@@ -1,12 +1,9 @@
 package devereux
 
 import (
-	"fmt"
+	"errors"
 	"io/ioutil"
 	"os"
-
-	"github.com/howeyc/gopass"
-"errors"
 )
 
 func promptForKeyIfNecessary(key string, prompt string, envVariable string) (string, error) {
@@ -20,14 +17,9 @@ func promptForKeyIfNecessary(key string, prompt string, envVariable string) (str
 	}
 
 	var err error
-	var keyBytes []byte
-
 	for key == "" {
-		fmt.Printf("Enter %s> ", prompt)
-		keyBytes, err = gopass.GetPasswd()
-		if err == nil {
-			key = string(keyBytes)
-		} else {
+		key, err = promptUserForInput(prompt)
+		if err != nil {
 			return "", err
 		}
 	}
@@ -36,7 +28,7 @@ func promptForKeyIfNecessary(key string, prompt string, envVariable string) (str
 }
 
 func GetPassword(passwordName string, repoName string, key string) (string, error) {
-	key, err := promptForKeyIfNecessary(key, "repository key", "DVRX_KEY")
+	key, err := promptForKeyIfNecessary(key, "Enter repository key> ", "DVRX_KEY")
 	if err != nil {
 		return "", err
 	}
@@ -60,12 +52,12 @@ func GetPassword(passwordName string, repoName string, key string) (string, erro
 }
 
 func SetPassword(passwordName string, repoName string, key string, password string) error {
-	key, err := promptForKeyIfNecessary(key, "repository key", "DVRX_KEY")
+	key, err := promptForKeyIfNecessary(key, "Enter repository key> ", "DVRX_KEY")
 	if err != nil {
 		return err
 	}
 
-	password, err = promptForKeyIfNecessary(password, "password", "DVRX_PASS")
+	password, err = promptForKeyIfNecessary(password, "Enter password> ", "DVRX_PASS")
 	if err != nil {
 		return err
 	}
@@ -89,7 +81,7 @@ func SetPassword(passwordName string, repoName string, key string, password stri
 }
 
 func CreateRepository(name string, setAsDefault bool, key string) (string, error) {
-	key, err := promptForKeyIfNecessary(key, "repository key", "DVRX_KEY")
+	key, err := promptForKeyIfNecessary(key, "Enter repository key> ", "DVRX_KEY")
 	if err != nil {
 		return "", err
 	}

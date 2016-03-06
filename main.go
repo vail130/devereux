@@ -40,7 +40,7 @@ func main() {
 
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 
-	// Create new password repo
+	// List existing password repos
 	case list.FullCommand():
 		names, err := devereux.GetRepositories()
 		if err != nil {
@@ -84,7 +84,7 @@ func main() {
 			clipboard.WriteAll(password)
 		}
 
-	// Create new password repo
+	// Delete a password repo
 	case delete.FullCommand():
 		err := devereux.DeleteRepository(*deleteRepoName)
 		if err != nil {

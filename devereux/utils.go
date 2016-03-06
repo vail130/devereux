@@ -11,13 +11,15 @@ import (
 	"io"
 	"log"
 	"os"
+
+	"github.com/howeyc/gopass"
 )
 
 var DEBUG = true
 
 func Debugf(format string, args ...interface{}) {
 	if DEBUG {
-		log.Printf("DEBUG "+format, args...)
+		log.Printf("DEBUG " + format, args...)
 	}
 }
 
@@ -44,7 +46,7 @@ func encrypt(keyText string, rawData []byte) ([]byte, error) {
 
 	// The IV needs to be unique, but not secure. Therefore it's common to
 	// include it at the beginning of the ciphertext.
-	ciphertext := make([]byte, aes.BlockSize+len(rawData))
+	ciphertext := make([]byte, aes.BlockSize + len(rawData))
 	iv := ciphertext[:aes.BlockSize]
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		return []byte(""), err
@@ -91,4 +93,17 @@ func concatByteSlices(byteSlices ...[]byte) []byte {
 		newByteSlice = append(newByteSlice, byteSlices[i]...)
 	}
 	return newByteSlice
+}
+
+func promptUserForInput(prompt string) (string, error) {
+	var err error
+	var keyBytes []byte
+
+	fmt.Print(prompt)
+	keyBytes, err = gopass.GetPasswd()
+	if err != nil {
+		return "", err
+	}
+
+	return string(keyBytes), nil
 }
