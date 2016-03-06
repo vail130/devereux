@@ -22,7 +22,6 @@ func (c *Config) Save(configPath string) error {
 
 	f, err := os.OpenFile(configPath, os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
-		Debugf("Problem updating config file")
 		return err
 	}
 	defer f.Close()

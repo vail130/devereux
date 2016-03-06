@@ -42,7 +42,7 @@ func (r *Repository) LoadFromFile(key string) error {
 	}
 
 	if len(repoData) == 0 {
-		return errors.New("Repository is invalid. No data in repository.")
+		return errors.New("Repository is empty.")
 	}
 
 	repoData, err = decrypt(key, repoData)
@@ -52,7 +52,7 @@ func (r *Repository) LoadFromFile(key string) error {
 
 	boundaryIndex := bytes.LastIndex(repoData, BOUNDARY_BYTES)
 	if boundaryIndex == -1 {
-		return errors.New("Repository is invalid. Cannot find boundary.")
+		return errors.New("Repository is corrupt.")
 	}
 
 	repoData = repoData[:boundaryIndex]
@@ -162,4 +162,14 @@ func (r *Repository) Create(key string, setAsDefault bool, configPath string) er
 	}
 
 	return err
+}
+
+func (r *Repository) Delete() error {
+	filePath := path.Join(REPO_PATH, r.Name)
+
+	if exists, _ := fileExists(filePath); !exists {
+		return errors.New("Password repository does not exist.")
+	}
+
+	return os.Remove(filePath)
 }

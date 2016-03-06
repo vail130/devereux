@@ -13,6 +13,8 @@ import (
 var (
 	app = kingpin.New("devereux", "A command-line password manager.")
 
+	list = app.Command("list", "List password repositories.")
+
 	new          = app.Command("new", "Create a new password repository.")
 	repoName     = new.Arg("name", "Name of password repository.").Required().String()
 	setAsDefault = new.Flag("default", "Make this the default password repository.").Short('d').Bool()
@@ -28,12 +30,28 @@ var (
 	getPasswordName = get.Arg("name", "Name of password.").Required().String()
 	getPasswordRepo = get.Flag("repo", "Password repository to use.").Short('r').String()
 	getPasswordKey  = get.Flag("key", "Repository password.").Short('k').String()
+
+	delete         = app.Command("delete", "Get a password from a repository.")
+	deleteRepoName = delete.Arg("repo", "Password repository to use.").Required().String()
 )
 
 func main() {
 	kingpin.Version("0.0.1")
 
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
+
+	// Create new password repo
+	case list.FullCommand():
+		names, err := devereux.GetRepositories()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		} else {
+			fmt.Println("Password repositories:")
+			for _, name := range names {
+				fmt.Println(name)
+			}
+		}
 
 	// Create new password repo
 	case new.FullCommand():
@@ -64,6 +82,16 @@ func main() {
 		} else {
 			fmt.Printf("Copied \"%s\" to your clipboard.\n", *getPasswordName)
 			clipboard.WriteAll(password)
+		}
+
+	// Create new password repo
+	case delete.FullCommand():
+		err := devereux.DeleteRepository(*deleteRepoName)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		} else {
+			fmt.Printf("Deleted password repository \"%s\".\n", *deleteRepoName)
 		}
 	}
 }
