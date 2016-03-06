@@ -1,28 +1,34 @@
 package devereux
 
 import (
-	"bufio"
 	"fmt"
 	"os"
+
+	"github.com/howeyc/gopass"
 )
 
-func promptForKeyIfNecessary(key string) string {
+func promptForKeyIfNecessary(key string, prompt string, envVariable string) string {
+	key = os.Getenv(envVariable)
+	if key != "" {
+		return key
+	}
+
 	var err error
+	var keyBytes []byte
+
 	for key == "" {
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print("Enter repository key> ")
-		key, err = reader.ReadString('\n')
-		if err != nil {
-			key = ""
-			continue
+		fmt.Printf("Enter %s> ", prompt)
+		keyBytes, err = gopass.GetPasswd()
+		if err == nil {
+			key = string(keyBytes)
 		}
 	}
 
 	return key
 }
 
-func GetPassword(passwordName string, key string, repoName string) (string, error) {
-	key = promptForKeyIfNecessary(key)
+func GetPassword(passwordName string, repoName string, key string) (string, error) {
+	key = promptForKeyIfNecessary(key, "repository key", "DVRX_KEY")
 
 	os.MkdirAll(REPO_PATH, 0777)
 	config, err := loadConfig(CONFIG_PATH)
@@ -38,8 +44,9 @@ func GetPassword(passwordName string, key string, repoName string) (string, erro
 	return repo.GetPassword(passwordName, key)
 }
 
-func SetPassword(passwordName string, password string, key string, repoName string) error {
-	key = promptForKeyIfNecessary(key)
+func SetPassword(passwordName string, repoName string, key string, password string) error {
+	key = promptForKeyIfNecessary(key, "repository key", "DVRX_KEY")
+	password = promptForKeyIfNecessary(password, "password", "DVRX_PASS")
 
 	os.MkdirAll(REPO_PATH, 0777)
 	config, err := loadConfig(CONFIG_PATH)
@@ -55,8 +62,8 @@ func SetPassword(passwordName string, password string, key string, repoName stri
 	return repo.SetPassword(passwordName, password, key)
 }
 
-func CreateRepository(name string, key string, setAsDefault bool) (string, error) {
-	key = promptForKeyIfNecessary(key)
+func CreateRepository(name string, setAsDefault bool, key string) (string, error) {
+	key = promptForKeyIfNecessary(key, "repository key", "DVRX_KEY")
 
 	os.MkdirAll(REPO_PATH, 0777)
 	config, err := loadConfig(CONFIG_PATH)
