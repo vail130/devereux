@@ -73,7 +73,7 @@ func SetPassword(passwordName string, repoName string, key string, password stri
 	}
 
 	if repoName == "" {
-		return "", errors.New("No default repository found. Specify one with the -r flag.")
+		return errors.New("No default repository found. Specify one with the -r flag.")
 	}
 
 	repo := &Repository{Name: repoName, config: config}
